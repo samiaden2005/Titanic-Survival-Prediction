@@ -6,24 +6,16 @@ from sklearn.ensemble import RandomForestClassifier
 test_data = pd.read_csv("titanic/test.csv")
 train_data = pd.read_csv("titanic/train.csv")
 
-for i in range(0,4):
-    if i == 0:
-        men = train_data.loc[(train_data.Sex == 'male'), "Survived"]
-        rate_men=sum(men)/len(men)
-        print(f"Men have a probability of surviving of {rate_men}")
+y = train_data["Survived"]
 
-    else:
-        i_class_men = train_data.loc[(train_data.Pclass == i) & (train_data.Sex == 'male'), "Survived"]
-        rate_i_class_men=sum(i_class_men)/len(i_class_men)
-        print(f"{i}st class men have a probability of surviving of {rate_i_class_men}")
+features = ["Pclass", "Sex", "SibSp", "Parch"]
+X = pd.get_dummies(train_data[features])
+X_test = pd.get_dummies(test_data[features])
 
-for i in range(0,4):
-    if i == 0:
-        women = train_data.loc[(train_data.Sex == 'female'), "Survived"]
-        rate_women=sum(women)/len(women)
-        print(f"\n Women have a probability of surviving of {rate_women}")
+model = RandomForestClassifier(n_estimators=100, max_depth=5, random_state=1)
+model.fit(X, y)
+predictions = model.predict(X_test)
 
-    else:
-        i_class_women = train_data.loc[(train_data.Pclass == i) & (train_data.Sex == 'female'), "Survived"]
-        rate_i_class_women=sum(i_class_women)/len(i_class_women)
-        print(f"{i}st class women have a probability of surviving of {rate_i_class_women}")
+output = pd.DataFrame({'PassengerId': test_data.PassengerId, 'Survived': predictions})
+output.to_csv('submission.csv', index=False)
+print("Your submission was successfully saved!")
